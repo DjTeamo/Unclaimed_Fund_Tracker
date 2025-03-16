@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Available Funds</h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Amount</th>
+                        <th>Source</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fund in funds %}
+                    <tr>
+                        <td>{{ fund.name }}</td>
+                        <td>${{ "%.2f"|format(fund.amount) }}</td>
+                        <td>{{ fund.source }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if fund.status == 'Claimed' else 'warning' }}">
+                                {{ fund.status }}
+                            </span>
+                        </td>
+                        <td>{{ fund.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            {% if fund.status == 'Pending' %}
+                            <button class="btn btn-sm btn-primary withdraw-btn" 
+                                    data-fund-id="{{ fund.id }}"
+                                    data-amount="{{ fund.amount }}">
+                                Withdraw
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Withdrawal Modal -->
+<div class="modal fade" id="withdrawModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Withdraw Funds</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="withdrawForm">
+                    <input type="hidden" id="fundId" name="fund_id">
+                    <div class="mb-3">
+                        <label class="form-label">Amount</label>
+                        <div class="form-control-static" id="withdrawAmount"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Payment Method</label>
+                        <select class="form-select" name="payment_method" required>
+                            <option value="stripe">Credit Card (Stripe)</option>
+                            <option value="paypal">PayPal</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmWithdraw">Confirm Withdrawal</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
